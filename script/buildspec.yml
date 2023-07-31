@@ -1,0 +1,30 @@
+version: 0.2
+
+env:
+  variables:
+    LAMBDA_LAYER_TYPE: "LAMBDA_LAYER_TYPE"
+    PLATFORM: "PLATFORM"
+    PYTHON_VERSION: "PYTHON_VERSION"
+  parameter-store:
+    EXEC_ENV: "EXEC_ENV"
+    GITHUB_TOKEN: "GITHUB_TOKEN"
+
+phases:
+  install:
+    runtime-versions:
+      python: ${PYTHON_VERSION}
+    commands:
+      - echo "EXEC_ENV=${EXEC_ENV}"
+      - echo "machine github.com" > ~/.netrc
+      - echo "  login ${GITHUB_TOKEN}" >> ~/.netrc
+      - cat  ~/.netrc
+      - python3 -m pip install --upgrade pip
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+      - unzip awscliv2.zip 1> /dev/null
+      - ./aws/install -b /root/.pyenv/shims
+      - aws --version
+  
+  build:
+    on-failure: ABORT
+    commands:
+      - ./script/Make${LAMBDA_LAYER_TYPE}LambdaLayer.sh ${PLATFORM} ${PYTHON_VERSION} ${EXEC_ENV} cloud
