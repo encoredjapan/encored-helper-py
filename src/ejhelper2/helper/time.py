@@ -1,6 +1,7 @@
 from typing import Optional
 
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 from time import time
 
 # タイムゾーンの生成
@@ -39,8 +40,25 @@ def convertSlot2Unixtime(recorded_date, slot=1):
     return int(converted_datetime.timestamp())
 
 
+def fromtimestamp(timestamp, tz=None):
+    """
+    Python 3.13互換のためのdatetime.fromtimestampラッパー関数
+    Decimal型の場合はintに変換して処理
+    
+    Args:
+        timestamp: Unix timestamp (intまたはDecimal)
+        tz: timezone (optional)
+    
+    Returns:
+        datetime: datetimeオブジェクト
+    """
+    if isinstance(timestamp, Decimal):
+        timestamp = int(timestamp)
+    return datetime.fromtimestamp(timestamp, tz)
+
+
 def convertUnixtime2Timestamp(unixtime):
-    return datetime.fromtimestamp(unixtime)
+    return fromtimestamp(unixtime)
 
 
 def getYear(datetime: Optional[datetime] = None):
